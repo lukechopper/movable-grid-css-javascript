@@ -1,7 +1,7 @@
 import './css/global.css';
 import './css/styles.css';
 
-import {findGridItem, orderGridItems, findLargestGridRow} from './Services/findGridItem';
+import {findGridItem, orderGridItems, findLastGridItem} from './Services/findGridItem';
 
 //GLOBAL
 let pos = {x: null, y: null}; //Mouse coordinates
@@ -157,7 +157,7 @@ addEventListener('mousemove', e => {
     //UPPER ROW
     if(selectedRow > 1){
         let straightUpItem = findGridItem(gridItems, selectedRow - 1, selectedCol);
-        if((pos.x > straightUpItem.item.offsetLeft && pos.x < straightUpItem.item.offsetLeft + straightUpItem.item.clientWidth) &&
+        if(straightUpItem.item && (pos.x > straightUpItem.item.offsetLeft && pos.x < straightUpItem.item.offsetLeft + straightUpItem.item.clientWidth) &&
         (pos.y < straightUpItem.item.offsetTop + (straightUpItem.item.clientHeight / 1.25))){
             positionItems({row: straightUpItem.row, col: straightUpItem.col}, {row: selectedRow, col: selectedCol});
             selectedItem.setAttribute('row', selectedRow - 1);
@@ -180,27 +180,10 @@ addEventListener('mousemove', e => {
             return;
         }
     }
-    //SAME ROW
-    let straightRightItem = findGridItem(gridItems, selectedRow, selectedCol + 1);
-    if(straightRightItem.item && (pos.y > straightRightItem.item.offsetTop && pos.y < straightRightItem.item.offsetTop + straightRightItem.item.clientHeight) &&
-        (pos.x > straightRightItem.item.offsetLeft + (straightRightItem.item.clientWidth / 4))){
-            positionItems({row: straightRightItem.row, col: straightRightItem.col}, {row: selectedRow, col: selectedCol});
-            selectedItem.setAttribute('row', selectedRow);
-            selectedItem.setAttribute('col', selectedCol + 1);
-            return;
-        }
-    let straightLeftItem = findGridItem(gridItems, selectedRow, selectedCol - 1);
-    if(straightLeftItem.item && (pos.y > straightLeftItem.item.offsetTop && pos.y < straightLeftItem.item.offsetTop + straightLeftItem.item.clientHeight) &&
-        (pos.x < straightLeftItem.item.offsetLeft + (straightLeftItem.item.clientWidth / 1.25) )){
-            positionItems({row: straightLeftItem.row, col: straightLeftItem.col}, {row: selectedRow, col: selectedCol});
-            selectedItem.setAttribute('row', selectedRow);
-            selectedItem.setAttribute('col', selectedCol - 1);
-            return;
-        }
     //BOTTOM ROW
     if(selectedRow < gridRows){
         let straightBottomItem = findGridItem(gridItems, selectedRow + 1, selectedCol);
-        if((pos.x > straightBottomItem.item.offsetLeft && pos.x < straightBottomItem.item.offsetLeft + straightBottomItem.item.clientWidth) &&
+        if(straightBottomItem.item && (pos.x > straightBottomItem.item.offsetLeft && pos.x < straightBottomItem.item.offsetLeft + straightBottomItem.item.clientWidth) &&
         (pos.y > straightBottomItem.item.offsetTop + (straightBottomItem.item.clientHeight / 4))){
             positionItems({row: straightBottomItem.row, col: straightBottomItem.col}, {row: selectedRow, col: selectedCol});
             selectedItem.setAttribute('row', selectedRow + 1);
@@ -220,6 +203,51 @@ addEventListener('mousemove', e => {
         (pos.y > bottomLeftItem.item.offsetTop + (bottomLeftItem.item.clientHeight / 4))){
             positionItems({row: bottomLeftItem.row, col: bottomLeftItem.col}, {row: selectedRow, col: selectedCol});
             selectedItem.setAttribute('row', selectedRow + 1);
+            selectedItem.setAttribute('col', selectedCol - 1);
+            return;
+        }
+        if(!bottomLeftItem.item && selectedRow === gridRows - 1){ //FOR UNBALANCED GRIDS
+            let lastItem = findLastGridItem(gridItems, gridRows);
+            if(lastItem.item && (pos.x > lastItem.item.offsetLeft && pos.x < lastItem.item.offsetLeft + lastItem.item.clientWidth) &&
+            (pos.y > lastItem.item.offsetTop + (lastItem.item.clientHeight / 4))){
+            positionItems({row: lastItem.row, col: lastItem.col}, {row: selectedRow, col: selectedCol});
+            selectedItem.setAttribute('row', lastItem.row);
+            selectedItem.setAttribute('col', lastItem.col);
+            return;
+        }
+        }
+    //SAME ROW
+    let straightRightItem = findGridItem(gridItems, selectedRow, selectedCol + 1);
+    if(straightRightItem.item && (pos.y > straightRightItem.item.offsetTop && pos.y < straightRightItem.item.offsetTop + straightRightItem.item.clientHeight) &&
+        (pos.x > straightRightItem.item.offsetLeft + (straightRightItem.item.clientWidth / 4))){
+            positionItems({row: straightRightItem.row, col: straightRightItem.col}, {row: selectedRow, col: selectedCol});
+            selectedItem.setAttribute('row', selectedRow);
+            selectedItem.setAttribute('col', selectedCol + 1);
+            return;
+        }
+    if(!straightRightItem.item && !bottomLeftItem.item && selectedRow === gridRows){ //FOR UNBALANCED GRIDS
+        let lastUpperRowItem = findLastGridItem(gridItems, gridRows - 1);
+        if(lastUpperRowItem.item && (pos.x > lastUpperRowItem.item.offsetLeft && pos.x < lastUpperRowItem.item.offsetLeft + lastUpperRowItem.item.clientWidth) &&
+        (pos.y < lastUpperRowItem.item.offsetTop + (lastUpperRowItem.item.clientHeight / 1.25))){
+            positionItems({row: lastUpperRowItem.row, col: lastUpperRowItem.col}, {row: selectedRow, col: selectedCol});
+            selectedItem.setAttribute('row', lastUpperRowItem.row);
+            selectedItem.setAttribute('col', lastUpperRowItem.col);
+            return;
+        }
+        let secondLastUpperRowItem = findLastGridItem(gridItems, gridRows - 1, 1);
+        if(secondLastUpperRowItem.item && (pos.x > secondLastUpperRowItem.item.offsetLeft && pos.x < secondLastUpperRowItem.item.offsetLeft + secondLastUpperRowItem.item.clientWidth) &&
+        (pos.y < secondLastUpperRowItem.item.offsetTop + (secondLastUpperRowItem.item.clientHeight / 1.25))){
+            positionItems({row: secondLastUpperRowItem.row, col: secondLastUpperRowItem.col}, {row: selectedRow, col: selectedCol});
+            selectedItem.setAttribute('row', secondLastUpperRowItem.row);
+            selectedItem.setAttribute('col', secondLastUpperRowItem.col);
+            return;
+        }
+    }
+    let straightLeftItem = findGridItem(gridItems, selectedRow, selectedCol - 1);
+    if(straightLeftItem.item && (pos.y > straightLeftItem.item.offsetTop && pos.y < straightLeftItem.item.offsetTop + straightLeftItem.item.clientHeight) &&
+        (pos.x < straightLeftItem.item.offsetLeft + (straightLeftItem.item.clientWidth / 1.25) )){
+            positionItems({row: straightLeftItem.row, col: straightLeftItem.col}, {row: selectedRow, col: selectedCol});
+            selectedItem.setAttribute('row', selectedRow);
             selectedItem.setAttribute('col', selectedCol - 1);
             return;
         }

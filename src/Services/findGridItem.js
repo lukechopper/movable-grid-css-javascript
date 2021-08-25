@@ -14,3 +14,14 @@ export function orderGridItems(gridItems){
     });
     return newGridItems;
 }
+
+export function findLastGridItem(gridItems, keepRow, modifier = 0){
+    let orderedGridItems = orderGridItems(gridItems); orderedGridItems.filter(item => Number(item.getAttribute('row')) === keepRow);
+    let lastGridItem = orderedGridItems[orderedGridItems.length - 1 - modifier];
+    let row = Number(lastGridItem.getAttribute('row')), col = Number(lastGridItem.getAttribute('col'));
+    return{
+        item: lastGridItem,
+        row,
+        col
+    }
+}
